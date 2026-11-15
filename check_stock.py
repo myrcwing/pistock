@@ -42,6 +42,7 @@ for cat, m in cfg["models"].items():
         try:
             age = datetime.now(timezone.utc) - parsedate_to_datetime(it.findtext("pubDate") or "")
             if age.total_seconds() > cfg.get("max_age_hours", 12) * 3600:
+                print(f"[skip] too old ({int(age.total_seconds()//3600)}h): {(it.findtext('title') or '')[:90]}")
                 continue                  # old alert: probably sold out by now
         except Exception:
             pass
@@ -49,14 +50,19 @@ for cat, m in cfg["models"].items():
         link = (it.findtext("link") or "").strip()
         desc = re.sub(r"<[^>]+>", " ", it.findtext("description") or "")
         text = f"{title} {desc} {link}".lower()
-        if any(w in text for w in cfg["blocked_words"]):
+        bad = [w for w in cfg["blocked_words"] if w in text]
+        if bad:
+            print(f"[skip] blocked site ({bad[0]}): {title[:90]}")
             continue
         if "out of stock" in text:
+            print(f"[skip] out of stock: {title[:90]}")
             continue
         pm = re.search(r"\$\s?(\d+(?:\.\d{2})?)", f"{title} {desc}")
         price = float(pm.group(1)) if pm else None
         if price is not None and price > m["max_price"]:
+            print(f"[skip] ${price} is over your ${m['max_price']} limit: {title[:90]}")
             continue  # above retail ceiling
+        print(f"[keep] {title[:100]}")
         store = re.sub(r"^.*?:\s*", "", title).split(" has ")[0].split(" - ")[0][:18]
         items.append({"store": store, "model": m["label"], "price": price,
                       "url": link})
