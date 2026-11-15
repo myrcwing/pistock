@@ -1,0 +1,11 @@
+{
+  "country": "US",
+  "models": {
+    "PI5": {"label": "Pi 5", "max_price": 130},
+    "PI4": {"label": "Pi 4", "max_price": 90},
+    "PIZERO2": {"label": "Zero 2 W", "max_price": 25}
+  },
+  "blocked_words": ["ebay", "etsy", "amazon", "walmart", "auction"],
+  "ntfy_topic": "CHANGE-ME-to-something-private-like-pockle-yourname-4821",
+  "max_items": 6
+}
