@@ -63,8 +63,15 @@ for cat, m in cfg["models"].items():
             print(f"[skip] ${price} is over your ${m['max_price']} limit: {title[:90]}")
             continue  # above retail ceiling
         print(f"[keep] {title[:100]}")
-        store = re.sub(r"^.*?:\s*", "", title).split(" has ")[0].split(" - ")[0][:18]
-        items.append({"store": store, "model": m["label"], "price": price,
+        t = re.sub(r"^Stock Alert \(\w+\):\s*", "", title)
+        mt = re.match(r"(.+?) is In Stock at (.+?)(?: \d+\+? units? in stock)?\.?$", t)
+        if mt:
+            model = (mt.group(1).replace("RPi ", "Pi ").replace("Raspberry ", "")
+                     .replace(" Model B", "").replace(" - ", " ").replace(" RAM", ""))
+            store = mt.group(2)
+        else:
+            model, store = m["label"], t
+        items.append({"store": store[:26], "model": model[:14], "price": price,
                       "url": link})
 
 items.sort(key=lambda i: (i["price"] is None, i["price"] or 0))
