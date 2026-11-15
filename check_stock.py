@@ -7,6 +7,7 @@ Standard library only. Run:  python check_stock.py   (add --dry to skip alerts)
 import json, re, sys, urllib.request, urllib.parse
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 
 DRY = "--dry" in sys.argv
 cfg = json.load(open("config.json"))
@@ -25,12 +26,25 @@ items = []
 for cat, m in cfg["models"].items():
     url = "https://rpilocator.com/feed/?" + urllib.parse.urlencode(
         {"country": cfg["country"], "cat": cat})
+    raw = ""
     try:
-        root = ET.fromstring(get(url))
+        raw = get(url).decode("utf-8", "replace").strip()
+        end = raw.find("</rss>")          # ignore anything after the feed ends
+        if end >= 0:
+            raw = raw[: end + 6]
+        root = ET.fromstring(raw.encode("utf-8"))
     except Exception as e:
         print(f"[warn] {cat}: {e}")
+        print("   feed starts with:", raw[:200].replace("\n", " "))
         continue
+    print(f"[info] {cat}: {len(list(root.iter('item')))} feed items")
     for it in root.iter("item"):
+        try:
+            age = datetime.now(timezone.utc) - parsedate_to_datetime(it.findtext("pubDate") or "")
+            if age.total_seconds() > cfg.get("max_age_hours", 12) * 3600:
+                continue                  # old alert: probably sold out by now
+        except Exception:
+            pass
         title = (it.findtext("title") or "").strip()
         link = (it.findtext("link") or "").strip()
         desc = re.sub(r"<[^>]+>", " ", it.findtext("description") or "")
