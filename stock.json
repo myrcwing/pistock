@@ -1,4 +1,23 @@
-{
- "updated": "2026-11-15T15:23+00:00",
- "items": []
-}
+name: pi-stock
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: pi-stock
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python check_stock.py
+      - run: |
+          git config user.name "pistock-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add stock.json
+          git diff --staged --quiet || git commit -m "update stock"
+          git pull --rebase
+          git push
