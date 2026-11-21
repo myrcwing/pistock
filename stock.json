@@ -1,4 +1,17 @@
 {
- "updated": "2026-11-20T18:52+00:00",
- "items": []
+ "updated": "2026-11-21T00:45+00:00",
+ "items": [
+  {
+   "store": "Adafruit",
+   "model": "Pi 5 2GB",
+   "price": null,
+   "url": "https://rpilocator.com?vendor=adafruit&utm_source=feed&utm_medium=rss"
+  },
+  {
+   "store": "Adafruit",
+   "model": "Pi Zero 2 W",
+   "price": null,
+   "url": "https://rpilocator.com?vendor=adafruit&utm_source=feed&utm_medium=rss"
+  }
+ ]
 }
